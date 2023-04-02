@@ -92,6 +92,25 @@ local function skk_gzip_d(target)
 	return job
 end
 
+---@return string
+local function get_degzip_path()
+	local script_path = debug.getinfo(2, 'S').source:sub(2)
+	local plugin_dir = script_path:match('(.*/).*/')
+	return plugin_dir .. 'powershell/degzip.ps1'
+end
+
+---@param target string
+---@return Job
+local function skk_degzip_ps1(target)
+	local degzip = get_degzip_path()
+	local Job = require('plenary.job')
+	local job = Job:new {
+		command = 'powershell.exe',
+		args = { '-executionpolicy', 'remotesigned', '-file', degzip, target },
+	}
+	return job
+end
+
 local function skk_extract(dir, dicts)
 	local Job = require('plenary.job')
 	---@type Job[]
@@ -107,7 +126,13 @@ local function skk_extract(dir, dicts)
 			table.insert(jobs, j)
 			j:start()
 		elseif string.sub(file, -3) == '.gz' then
-			local j = skk_gzip_d(dir .. '/' .. file)
+			local ungzip = nil
+			if vim.fn.executable('gzip') == 0 and vim.fn.executable('powershell.exe') == 1 then
+				ungzip = skk_degzip_ps1
+			else
+				ungzip = skk_gzip_d
+			end
+			local j = ungzip(dir .. '/' .. file)
 			table.insert(jobs, j)
 			j:start()
 		end
