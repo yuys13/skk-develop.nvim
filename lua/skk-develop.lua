@@ -55,26 +55,27 @@ end
 ---@param dir string Download destination directory
 ---@param dicts string[] List of SKK dictionaries to download
 local function skk_get_dictionary(dir, dicts)
-	local curl = require('plenary.curl')
-	local done = 0
-	local errors = {}
+	local Job = require('plenary.job')
+	local jobs = {}
 	for _, file in ipairs(dicts) do
-		curl.get('https://skk-dev.github.io/dict/' .. file, {
-			output = dir .. '/' .. file,
-			callback = function(out)
-				done = done + 1
-				if out.status ~= 200 then
-					table.insert(errors, out)
-				end
-			end,
-		})
+		local job = Job:new {
+			command = 'curl',
+			args = { '-fsSLO', 'https://skk-dev.github.io/dict/' .. file },
+			cwd = dir,
+		}
+		table.insert(jobs, job)
+		job:start()
 	end
 
-	vim.wait(3 * 1000 * 60, function()
-		return done == #skk_get_files
-	end)
+	local errors = {}
+	for _, job in ipairs(jobs) do
+		job:wait()
+		if job.code ~= 0 then
+			table.insert(errors, job)
+		end
+	end
 
-	if 0 < #errors then
+	if #errors ~= 0 then
 		return errors
 	end
 
