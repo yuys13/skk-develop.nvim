@@ -22,8 +22,8 @@ local skk_get_files = {
 	'zipcode.tar.gz',
 }
 
----@param dir string Download destination directory
----@param dicts string[] List of SKK dictionaries to download
+---@param dir string The destination directory for downloads
+---@param dicts string[] The list of SKK dictionaries to download
 local function skk_clear_target_dir(dir, dicts)
 	for _, file in ipairs(dicts) do
 		local fullpath = dir .. '/' .. file
@@ -42,8 +42,8 @@ local function skk_clear_target_dir(dir, dicts)
 	end
 end
 
----@param dir string Download destination directory
----@param dicts string[] List of SKK dictionaries to download
+---@param dir string The destination directory for downloads
+---@param dicts string[] The list of SKK dictionaries to download
 local function skk_create_target_dir(dir, dicts)
 	if vim.fn.isdirectory(dir) == 0 then
 		vim.fn.mkdir(dir, 'p')
@@ -52,8 +52,8 @@ local function skk_create_target_dir(dir, dicts)
 	end
 end
 
----@param dir string Download destination directory
----@param dicts string[] List of SKK dictionaries to download
+---@param dir string The destination directory for downloads
+---@param dicts string[] The list of SKK dictionaries to download
 ---@return Job[]|nil errors
 local function skk_get_dictionary(dir, dicts)
 	local Job = require('plenary.job')
@@ -103,8 +103,8 @@ local function get_degzip_path()
 	return plugin_dir .. 'powershell/degzip.ps1'
 end
 
----@param dir string Download destination directory
----@param dicts string[] List of SKK dictionaries to download
+---@param dir string The destination directory for downloads
+---@param dicts string[] The list of SKK dictionaries to download
 ---@return Job[]|nil errors
 local function skk_extract(dir, dicts)
 	local Job = require('plenary.job')
@@ -161,12 +161,12 @@ local function skk_extract(dir, dicts)
 	return nil
 end
 
---- `skk_get`はhttps://skk-dev.github.io/dict/からSKK辞書をダウンロードします。
---- ダウンロード先は`dir`で指定可能です。
---- 省略した場合はstdpath('data') .. '/skk-get-jisyo'です。
---- stdpath('data')の場所は`:echo stdpath('data')`で確認できます。
---- ダウンロードする辞書は`dicts`で指定可能です。
---- 省略した場合はDDSKKに倣って以下の辞書をダウンロードします。
+--- `skk_get` downloads SKK dictionaries from https://skk-dev.github.io/dict/.
+--- The destination directory can be specified with the `dir` parameter. If omitted,
+--- it defaults to stdpath('data') .. '/skk-get-jisyo'. The location of stdpath('data')
+--- can be confirmed with :echo stdpath('data').
+--- The dictionaries to download can be specified with the `dicts` parameter. If
+--- omitted, the following dictionaries will be downloaded, following DDSKK:
 --- - 'SKK-JISYO.JIS2.gz',
 --- - 'SKK-JISYO.JIS2004.gz',
 --- - 'SKK-JISYO.JIS3_4.gz',
@@ -185,8 +185,8 @@ end
 --- - 'SKK-JISYO.pubdic+.gz',
 --- - 'SKK-JISYO.station.gz',
 --- - 'zipcode.tar.gz',
----@param dir string|nil Download destination directory(default: stdpath('data') .. '/skk-get-jisyo')
----@param dicts string[]|nil List of SKK dictionaries to download(default: same as ddskk)
+---@param dir string|nil The destination directory for downloads (default is stdpath('data') .. '/skk-get-jisyo').
+---@param dicts string[]|nil The list of SKK dictionaries to download (default is the same as DDSKK).
 ---@return boolean ok
 local function skk_get(dir, dicts)
 	dir = dir or vim.fn.stdpath('data') .. '/skk-get-jisyo'
