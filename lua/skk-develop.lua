@@ -54,8 +54,10 @@ end
 
 ---@param dir string Download destination directory
 ---@param dicts string[] List of SKK dictionaries to download
+---@return Job[]|nil errors
 local function skk_get_dictionary(dir, dicts)
 	local Job = require('plenary.job')
+	---@type Job[]
 	local jobs = {}
 	for _, file in ipairs(dicts) do
 		local job = Job:new {
@@ -67,6 +69,7 @@ local function skk_get_dictionary(dir, dicts)
 		job:start()
 	end
 
+	---@type Job[]
 	local errors = {}
 	for _, job in ipairs(jobs) do
 		job:wait()
@@ -100,6 +103,9 @@ local function get_degzip_path()
 	return plugin_dir .. 'powershell/degzip.ps1'
 end
 
+---@param dir string Download destination directory
+---@param dicts string[] List of SKK dictionaries to download
+---@return Job[]|nil errors
 local function skk_extract(dir, dicts)
 	local Job = require('plenary.job')
 	---@type Job[]
@@ -133,6 +139,7 @@ local function skk_extract(dir, dicts)
 		end
 	end
 
+	---@type Job[]
 	local errors = {}
 	for _, job in ipairs(jobs) do
 		job:wait()
