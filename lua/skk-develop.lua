@@ -1,5 +1,17 @@
 local M = {}
 
+local path = {}
+
+path.separator = vim.fn.expand('/')
+
+function path.join(...)
+	return table.concat({ ... }, path.separator)
+end
+
+function path.dirname(p)
+	return vim.fn.expand(vim.fs.dirname(p))
+end
+
 --- @type string[]
 local skk_get_files = {
 	'SKK-JISYO.JIS2.gz',
@@ -26,18 +38,18 @@ local skk_get_files = {
 ---@param dicts string[] The list of SKK dictionaries to download
 local function skk_clear_target_dir(dir, dicts)
 	for _, file in ipairs(dicts) do
-		local fullpath = dir .. '/' .. file
+		local fullpath = path.join(dir, file)
 		os.remove(fullpath)
 		os.remove(fullpath:gsub('%.gz$', ''))
 		os.remove(fullpath:gsub('%.tar.gz$', ''))
 
 		if file == 'SKK-JISYO.edict.tar.gz' then
-			os.remove(dir .. '/edict_doc.html')
+			os.remove(path.join(dir, 'edict_doc.html'))
 		end
 
 		if file == 'zipcode.tar.gz' then
-			os.remove(dir .. '/SKK-JISYO.zipcode')
-			os.remove(dir .. '/SKK-JISYO.office.zipcode')
+			os.remove(path.join(dir, 'SKK-JISYO.zipcode'))
+			os.remove(path.join(dir, 'SKK-JISYO.office.zipcode'))
 		end
 	end
 end
@@ -98,9 +110,9 @@ end
 
 ---@return string
 local function get_degzip_path()
-	local script_path = debug.getinfo(2, 'S').source:sub(2)
-	local plugin_dir = script_path:match('(.*/).*/')
-	return plugin_dir .. 'powershell/degzip.ps1'
+	local script_path = debug.getinfo(1, 'S').source:sub(2)
+	local plugin_dir = path.dirname(script_path)
+	return path.join(plugin_dir, 'powershell', 'degzip.ps1')
 end
 
 ---@param dir string The destination directory for downloads
@@ -129,10 +141,10 @@ local function skk_extract(dir, dicts)
 					'remotesigned',
 					'-file',
 					get_degzip_path(),
-					dir .. '/' .. file,
+					path.join(dir, file),
 				}
 			else
-				local j = skk_gzip_d(dir .. '/' .. file)
+				local j = skk_gzip_d(path.join(dir, file))
 				table.insert(jobs, j)
 				j:start()
 			end
@@ -152,15 +164,16 @@ local function skk_extract(dir, dicts)
 		return errors
 	end
 
-	if vim.fn.isdirectory(dir .. '/zipcode') == 1 then
-		os.rename(dir .. '/zipcode/' .. 'SKK-JISYO.zipcode', dir .. '/SKK-JISYO.zipcode')
-		os.rename(dir .. '/zipcode/' .. 'SKK-JISYO.office.zipcode', dir .. '/SKK-JISYO.office.zipcode')
-		vim.fn.delete(dir .. '/zipcode', 'rf')
+	if vim.fn.isdirectory(path.join(dir, 'zipcode')) == 1 then
+		os.rename(path.join(dir, 'zipcode', 'SKK-JISYO.zipcode'), path.join(dir, 'SKK-JISYO.zipcode'))
+		os.rename(path.join(dir, 'zipcode', 'SKK-JISYO.office.zipcode'), path.join(dir, 'SKK-JISYO.office.zipcode'))
+		vim.fn.delete(path.join(dir, 'zipcode'), 'rf')
 	end
 
 	return nil
 end
 
+--
 --- `skk_get` downloads SKK dictionaries from https://skk-dev.github.io/dict/.
 --- The destination directory can be specified with the `dir` parameter. If omitted,
 --- it defaults to stdpath('data') .. '/skk-get-jisyo'. The location of stdpath('data')
@@ -189,7 +202,7 @@ end
 ---@param dicts string[]|nil The list of SKK dictionaries to download (default is the same as DDSKK).
 ---@return boolean ok
 local function skk_get(dir, dicts)
-	dir = dir or vim.fn.stdpath('data') .. '/skk-get-jisyo'
+	dir = dir or path.join(vim.fn.stdpath('data'), 'skk-get-jisyo')
 	dicts = dicts or skk_get_files
 	skk_create_target_dir(dir, dicts)
 	local errors
