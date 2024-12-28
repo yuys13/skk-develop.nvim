@@ -38,7 +38,7 @@ jobs:
   test:
     strategy:
       matrix:
-        os: ['ubuntu-latest']
+        os: ['ubuntu-latest', 'macos-latest']
         version: ['stable', 'nightly']
 
     runs-on: ${{ matrix.os }}
