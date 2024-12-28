@@ -208,13 +208,13 @@ local function skk_get(dir, dicts)
 	local errors
 	errors = skk_get_dictionary(dir, dicts)
 	if errors then
-		vim.pretty_print(errors)
+		vim.print(errors)
 		vim.cmd([[echoerr 'failed to download JISYO']])
 		return false
 	end
 	errors = skk_extract(dir, dicts)
 	if errors then
-		vim.pretty_print(errors)
+		vim.print(errors)
 		vim.cmd([[echoerr 'failed to extract JISYO']])
 		return false
 	end
