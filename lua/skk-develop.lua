@@ -66,27 +66,24 @@ end
 
 ---@param dir string The destination directory for downloads
 ---@param dicts string[] The list of SKK dictionaries to download
----@return Job[]|nil errors
+---@return vim.SystemCompleted[]|nil errors
 local function skk_get_dictionary(dir, dicts)
-	local Job = require('plenary.job')
-	---@type Job[]
+	---@type vim.SystemObj[]
 	local jobs = {}
 	for _, file in ipairs(dicts) do
-		local job = Job:new {
-			command = 'curl',
-			args = { '-fsSLO', 'https://skk-dev.github.io/dict/' .. file },
+		local job = vim.system({ 'curl', '-fsSLO', 'https://skk-dev.github.io/dict/' .. file }, {
 			cwd = dir,
-		}
+			text = true,
+		})
 		table.insert(jobs, job)
-		job:start()
 	end
 
-	---@type Job[]
+	---@type vim.SystemCompleted[]
 	local errors = {}
 	for _, job in ipairs(jobs) do
-		job:wait()
-		if job.code ~= 0 then
-			table.insert(errors, job)
+		local comp = job:wait()
+		if comp.code ~= 0 then
+			table.insert(errors, comp)
 		end
 	end
 
@@ -98,13 +95,9 @@ local function skk_get_dictionary(dir, dicts)
 end
 
 ---@param target string
----@return Job
+---@return vim.SystemObj
 local function skk_gzip_d(target)
-	local Job = require('plenary.job')
-	local job = Job:new {
-		command = 'gzip',
-		args = { '-d', target },
-	}
+	local job = vim.system { 'gzip', '-d', target }
 	return job
 end
 
@@ -117,21 +110,15 @@ end
 
 ---@param dir string The destination directory for downloads
 ---@param dicts string[] The list of SKK dictionaries to download
----@return Job[]|nil errors
+---@return vim.SystemCompleted[]|nil errors
 local function skk_extract(dir, dicts)
-	local Job = require('plenary.job')
-	---@type Job[]
+	---@type vim.SystemObj[]
 	local jobs = {}
 
 	for _, file in ipairs(dicts) do
 		if string.sub(file, -7) == '.tar.gz' then
-			local j = Job:new {
-				command = 'tar',
-				args = { 'zxf', file },
-				cwd = dir,
-			}
-			table.insert(jobs, j)
-			j:start()
+			local job = vim.system({ 'tar', 'zxf', file }, { text = true, cwd = dir })
+			table.insert(jobs, job)
 		elseif string.sub(file, -3) == '.gz' then
 			if vim.fn.executable('gzip') == 0 and vim.fn.executable('powershell.exe') == 1 then
 				vim.fn.system {
@@ -144,19 +131,18 @@ local function skk_extract(dir, dicts)
 					path.join(dir, file),
 				}
 			else
-				local j = skk_gzip_d(path.join(dir, file))
-				table.insert(jobs, j)
-				j:start()
+				local job = skk_gzip_d(path.join(dir, file))
+				table.insert(jobs, job)
 			end
 		end
 	end
 
-	---@type Job[]
+	---@type vim.SystemCompleted[]
 	local errors = {}
 	for _, job in ipairs(jobs) do
-		job:wait()
-		if job.code ~= 0 then
-			table.insert(errors, job)
+		local comp = job:wait()
+		if comp.code ~= 0 then
+			table.insert(errors, comp)
 		end
 	end
 
