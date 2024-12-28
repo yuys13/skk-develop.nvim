@@ -4,20 +4,16 @@ skk-develop.nvim provides skk-get for neovim
 
 ## Requirements
 
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-- curl, tar, gzip(or powershell.exe)
+- curl
+- tar
+- gzip(or powershell.exe)
 
 ## Installation
 
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
-{
-  'yuys13/skk-develop.nvim',
-  dependencies = {
-    { 'nvim-lua/plenary.nvim' },
-  },
-},
+{ 'yuys13/skk-develop.nvim' },
 ```
 
 ## Usage

@@ -1,15 +1,6 @@
 local M = {}
 
 M.check = function()
-	-- check plugins
-	vim.health.start('Checking for required plugins')
-
-	if pcall(require, 'plenary') then
-		vim.health.ok('plenary: installed')
-	else
-		vim.health.error('plenary: not available', 'Install https://github.com/nvim-lua/plenary.nvim')
-	end
-
 	-- check executable
 	vim.health.start('Checking external dependencies')
 
