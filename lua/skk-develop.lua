@@ -8,10 +8,6 @@ function path.join(...)
 	return table.concat({ ... }, path.separator)
 end
 
-function path.dirname(p)
-	return vim.fn.expand(vim.fs.dirname(p))
-end
-
 --- @type string[]
 local skk_get_files = {
 	'SKK-JISYO.JIS2.gz',
@@ -104,7 +100,7 @@ end
 ---@return string
 local function get_degzip_path()
 	local script_path = debug.getinfo(1, 'S').source:sub(2)
-	local plugin_dir = path.dirname(script_path)
+	local plugin_dir = vim.fn.fnamemodify(script_path, ':p:h:h')
 	return path.join(plugin_dir, 'powershell', 'degzip.ps1')
 end
 
