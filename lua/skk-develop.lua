@@ -127,6 +127,8 @@ local function skk_extract(dir, dicts)
 					path.join(dir, file),
 				}, { text = true })
 				table.insert(jobs, job)
+				job:wait()
+				os.remove(path.join(dir, file))
 			else
 				local job = skk_gzip_d(path.join(dir, file))
 				table.insert(jobs, job)
