@@ -121,7 +121,7 @@ local function skk_extract(dir, dicts)
 			table.insert(jobs, job)
 		elseif string.sub(file, -3) == '.gz' then
 			if vim.fn.executable('gzip') == 0 and vim.fn.executable('powershell.exe') == 1 then
-				vim.fn.system {
+				local job = vim.system({
 					'powershell.exe',
 					'-noprofile',
 					'-executionpolicy',
@@ -129,7 +129,8 @@ local function skk_extract(dir, dicts)
 					'-file',
 					get_degzip_path(),
 					path.join(dir, file),
-				}
+				}, { text = true })
+				table.insert(jobs, job)
 			else
 				local job = skk_gzip_d(path.join(dir, file))
 				table.insert(jobs, job)
