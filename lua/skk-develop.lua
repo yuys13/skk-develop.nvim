@@ -8,10 +8,6 @@ function path.join(...)
 	return table.concat({ ... }, path.separator)
 end
 
-function path.dirname(p)
-	return vim.fn.expand(vim.fs.dirname(p))
-end
-
 --- @type string[]
 local skk_get_files = {
 	'SKK-JISYO.JIS2.gz',
@@ -104,7 +100,7 @@ end
 ---@return string
 local function get_degzip_path()
 	local script_path = debug.getinfo(1, 'S').source:sub(2)
-	local plugin_dir = path.dirname(script_path)
+	local plugin_dir = vim.fn.fnamemodify(script_path, ':p:h:h')
 	return path.join(plugin_dir, 'powershell', 'degzip.ps1')
 end
 
@@ -121,7 +117,7 @@ local function skk_extract(dir, dicts)
 			table.insert(jobs, job)
 		elseif string.sub(file, -3) == '.gz' then
 			if vim.fn.executable('gzip') == 0 and vim.fn.executable('powershell.exe') == 1 then
-				vim.fn.system {
+				local job = vim.system({
 					'powershell.exe',
 					'-noprofile',
 					'-executionpolicy',
@@ -129,7 +125,10 @@ local function skk_extract(dir, dicts)
 					'-file',
 					get_degzip_path(),
 					path.join(dir, file),
-				}
+				}, { text = true })
+				table.insert(jobs, job)
+				job:wait()
+				os.remove(path.join(dir, file))
 			else
 				local job = skk_gzip_d(path.join(dir, file))
 				table.insert(jobs, job)
