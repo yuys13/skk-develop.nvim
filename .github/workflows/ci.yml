@@ -61,3 +61,30 @@ jobs:
 
       - name: Run test
         run: make test
+
+  wintest:
+    strategy:
+      matrix:
+        version: ['stable', 'nightly']
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check out deps
+        uses: actions/checkout@v4
+        with:
+          repository: nvim-lua/plenary.nvim
+          path: deps/plenary.nvim
+
+      - name: Set up Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.version }}
+
+      - name: Run test
+        shell: powershell
+        run: nvim --headless -u test/init.vim -c "PlenaryBustedDirectory test/"
