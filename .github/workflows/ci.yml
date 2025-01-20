@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: nvim-lua/plenary.nvim
-          path: deps/plenary.nvim
+          path: .deps/plenary.nvim
 
       - name: Set up Neovim
         uses: rhysd/action-setup-vim@v1
